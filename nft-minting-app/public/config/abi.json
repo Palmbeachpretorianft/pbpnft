@@ -1,0 +1,98 @@
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.8.7;
+
+
+import "erc721a/contracts/ERC721A.sol";
+
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract PalmBeachPretoria is ERC721A, Ownable {
+	enum Stage { PRESALE, SALE }
+
+	Stage public currentStage;
+
+	uint public constant MAX_SUPPLY = 35000;
+	uint public constant MAX_PRESALE_MINT = 8000;
+
+	uint public mintPrice;
+	uint public totalPresaleMint;
+	uint public constant MAX_MINT_PER_WALLET = 10;
+
+	string private URI;
+
+	mapping(address => bool) private whitelist;
+	mapping(address => uint) private mints;
+
+	constructor(
+		uint _mintPrice,
+        string memory _URI
+	) ERC721A("Palm Beach Pretoria", "PBP") {
+		currentStage = Stage.PRESALE;
+        URI = _URI;
+        
+        setMintPrice(_mintPrice);
+	}
+
+	function mint(address _to, uint _amount) public payable {
+		require(_amount + _totalMinted() <= MAX_SUPPLY, "Exceeds max supply");
+        require (_amount > 0, "Can't mint 0 tokens");
+		
+		if(msg.sender != owner()) {
+			require (
+				MAX_MINT_PER_WALLET >= mints[msg.sender] + _amount,
+				"Exceeds mintable amount"
+			);
+			if (currentStage == Stage.PRESALE) {
+				require (_amount + totalPresaleMint <= MAX_PRESALE_MINT, "Exceeds presale allocation");
+				require (whitelist[msg.sender], "You've not been whiltelisted yet");
+				totalPresaleMint += _amount;
+	        } else {}
+
+	        mints[msg.sender] += _amount;
+	        require (msg.value >= mintPrice * _amount, "Not enough funds sent");
+		}
+
+		_mint(_to, _amount);
+	}
+
+	function tokenURI(
+		uint /* tokenId */ 
+	) public override view returns (string memory) {
+		string memory _uri = URI;
+		return _uri;
+	}
+
+	function amountMinted (address _user) public view returns(uint) {
+		return mints[_user];
+	}
+
+	function isWhitelisted(address _user) public view returns(bool) {
+		return whitelist[_user];
+	}
+
+	function whitelistUser (address _userToWhitelist) external onlyOwner {
+        whitelist[_userToWhitelist] = true;
+	}
+
+    function removeWhitelistUser(address _userToWhitelist) external onlyOwner {
+        whitelist[_userToWhitelist] = false;
+    }
+
+    function setMintPrice (uint _newMintPrice) public onlyOwner {
+    	mintPrice = _newMintPrice;
+    }
+    
+	function endPresale () external onlyOwner {
+		currentStage = Stage.SALE;
+	}
+
+	function withdraw() external onlyOwner {
+		uint256 balance = address(this).balance;
+		require(balance > 0);
+		(bool success, ) = payable(msg.sender).call{value: balance}("");
+		require(success, "Transfer ETH failed to owner.");
+	}
+
+
+}

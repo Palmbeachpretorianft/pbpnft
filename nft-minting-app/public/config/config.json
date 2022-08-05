@@ -1,0 +1,18 @@
+{
+  "CONTRACT_ADDRESS": " 0xbEdba5d3520702A743a208cF33098833c6325bD8",
+  "SCAN_LINK": "https://polygonscan.com/address/0xbEdba5d3520702A743a208cF33098833c6325bD8#code",
+  "NETWORK": {
+    "NAME": "Polygon",
+    "SYMBOL": "Matic",
+    "ID": 137
+  },
+  "NFT_NAME": "PBP Diamond NFT Ticket",
+  "SYMBOL": "PBPNFT",
+  "MAX_SUPPLY": 35000,
+  "WEI_COST": 278000000000000000000,
+  "DISPLAY_COST": 278,
+  "GAS_LIMIT": 285000,
+  "MARKETPLACE": "Opeansea",
+  "MARKETPLACE_LINK": "https://opensea.io/collection/pbpticket",
+  "SHOW_BACKGROUND": true
+}
